@@ -16,4 +16,4 @@ def mandelbrot(c, iterations):
     z = 0
     for _ in range(iterations):
         z = z**2 + c
-    return z >= -2 and z <= 2
+    return abs(z) <= 2
