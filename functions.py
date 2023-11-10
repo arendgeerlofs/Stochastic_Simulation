@@ -19,7 +19,7 @@ def mandelbrot(c, iterations):
         z = z**2 + c
     return abs(z) <= 2
 
-def MC_integration(iterations, samples, randomS=False, LatinS=False, Orthog=False):
+def MC_integration(iterations, samples, type_of_sampling = []):#, randomS=False, LatinS=False, Orthog=False):
     
     xmin = -2
     xmax = 2
@@ -33,13 +33,13 @@ def MC_integration(iterations, samples, randomS=False, LatinS=False, Orthog=Fals
     
     counter = 0
     
-    if randomS:
+    if type_of_sampling == 'randomS':
         counter = random_sampling(mb_matrix, samples)
     
-    if LatinS:
+    if type_of_sampling == 'LatinS':
         counter, samples = Latin_hypercube(mb_matrix, samples)
 
-    if Orthog:
+    if type_of_sampling == 'Orthog':
         counter, samples = Orthogonal_sampling(mb_matrix, samples)
     
     return total_area*counter/samples
@@ -97,3 +97,24 @@ def Orthogonal_sampling(mb_matrix, samples):
         if np.real(mb_matrix[int(x_index*(np.shape(mb_matrix)[0]/major**2))][int(y_index*(np.shape(mb_matrix)[1]/major**2))]):
             counter += 1
     return counter, samples
+
+def statistics(iterations, samples, runs, type_of_sampling = []):#, type_of_sampling):      # Ik heb gebruik gemaakt van type_of_sampling zodat we hier 
+    areas = []                                                      # ook over kunnen loopen ipv dat we de opties één voor één moeten runnen
+    for _ in range(runs):
+        areas.append(MC_integration(int(iterations), samples, type_of_sampling))     #mc_int_estimate in deze file is geloof ik
+    mean_area = np.mean(areas)
+    confidence_interval = np.percentile(areas, [2.5, 97.5])
+    return [mean_area, confidence_interval]
+    
+def stats_per_iteration_value(iterations, samples, runs, type_of_sampling = []): #Ik zou dit bijna een main willen noemen
+    type_of_sampling = ['randomS', 'LatinS', 'Orthog']
+    mean_area =[]
+    confidence_interval =[]
+    A_j = np.zeros((iterations, 3))
+    for i in range(iterations):
+        #for j in range(len(type_of_sampling)):
+        mean_area, confidence_interval = statistics(int(i), samples, runs, type_of_sampling)#, type_of_sampling[j])
+        A_j[i,0] = mean_area
+        A_j[i,1] = confidence_interval[0]
+        A_j[i,2] = confidence_interval[1]
+    return A_j # en dan ipv dit returnen vanaf hier plotten
