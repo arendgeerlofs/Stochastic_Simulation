@@ -22,27 +22,27 @@ def mandelbrot(c, iterations):
 def MC_integration(iterations, samples, type_of_sampling = []):#, randomS=False, LatinS=False, Orthog=False):
     
     xmin = -2
-    xmax = 2
-    ymin = -2
-    ymax = 2
+    xmax = 1
+    ymin = -1
+    ymax = 1
     total_area = abs(xmax - xmin)*abs(ymax-ymin)
     
     # TODO choose pixel density/add to function variables
     matrix = complex_matrix(xmin, xmax, ymin, ymax, 100)
     mb_matrix = mandelbrot(matrix, iterations)
     
-    counter = 0
+    ratio = np.zeros((3, 1))
     
-    if type_of_sampling == 'randomS':
-        counter = random_sampling(mb_matrix, samples)
-    
-    if type_of_sampling == 'LatinS':
-        counter, samples = Latin_hypercube(mb_matrix, samples)
+    if 'randomS' in type_of_sampling:
+        ratio[0] = random_sampling(mb_matrix, samples)
+        
+    if 'LatinS' in type_of_sampling:
+        ratio[1], samples = Latin_hypercube(mb_matrix, samples)
 
-    if type_of_sampling == 'Orthog':
-        counter, samples = Orthogonal_sampling(mb_matrix, samples)
+    if 'OrthogS' in type_of_sampling:
+        ratio[2], samples = Orthogonal_sampling(mb_matrix, samples)
     
-    return total_area*counter/samples
+    return total_area*ratio
 
 def random_sampling(mb_matrix, samples):
     counter = 0
@@ -53,8 +53,8 @@ def random_sampling(mb_matrix, samples):
         
         if np.real(mb_matrix[i,j]):
             counter += 1
-    print(counter)
-    return counter
+
+    return counter/samples
 
 def Latin_hypercube(mb_matrix, samples):
     counter = 0
@@ -74,7 +74,7 @@ def Latin_hypercube(mb_matrix, samples):
         row_indexes.remove(i)
         column_indexes.remove(j)
     print(counter)
-    return counter, samples
+    return counter/samples
 
 def Orthogonal_sampling(mb_matrix, samples):
     if samples > np.shape(mb_matrix)[0] * np.shape(mb_matrix)[1]:
@@ -96,7 +96,7 @@ def Orthogonal_sampling(mb_matrix, samples):
         y_index = int(y_array[int((i-i%major)/major)][i%major])
         if np.real(mb_matrix[int(x_index*(np.shape(mb_matrix)[0]/major**2))][int(y_index*(np.shape(mb_matrix)[1]/major**2))]):
             counter += 1
-    return counter, samples
+    return counter/samples
 
 def statistics(iterations, samples, runs, type_of_sampling = []):#, type_of_sampling):      # Ik heb gebruik gemaakt van type_of_sampling zodat we hier 
     areas = []                                                      # ook over kunnen loopen ipv dat we de opties één voor één moeten runnen
@@ -107,7 +107,7 @@ def statistics(iterations, samples, runs, type_of_sampling = []):#, type_of_samp
     return [mean_area, confidence_interval]
     
 def stats_per_iteration_value(iterations, samples, runs, type_of_sampling = []): #Ik zou dit bijna een main willen noemen
-    type_of_sampling = ['randomS', 'LatinS', 'Orthog']
+    type_of_sampling = ['randomS', 'LatinS', 'OrthogS']
     mean_area =[]
     confidence_interval =[]
     A_j = np.zeros((iterations, 3))
