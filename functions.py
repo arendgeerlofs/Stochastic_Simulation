@@ -99,10 +99,10 @@ def Orthogonal_sampling(mb_matrix, samples):
     return counter/samples
 
 def statistics(iterations, samples, runs, type_of_sampling = []):#, type_of_sampling):      # Ik heb gebruik gemaakt van type_of_sampling zodat we hier 
-    areas = []                                                      # ook over kunnen loopen ipv dat we de opties één voor één moeten runnen
-    for _ in range(runs):
-        areas.append(MC_integration(int(iterations), samples, type_of_sampling))     #mc_int_estimate in deze file is geloof ik
-    mean_area = np.mean(areas)
+    areas = np.zeros([3, samples])                                                      # ook over kunnen loopen ipv dat we de opties één voor één moeten runnen
+    for i in range(runs):
+        areas[i] = MC_integration(int(iterations), samples, type_of_sampling)     #mc_int_estimate in deze file is geloof ik
+    mean_area = np.mean(areas, axis=0)
     confidence_interval = np.percentile(areas, [2.5, 97.5])
     return [mean_area, confidence_interval]
     
@@ -113,8 +113,10 @@ def stats_per_iteration_value(iterations, samples, runs, type_of_sampling = []):
     A_j = np.zeros((iterations, 3))
     for i in range(iterations):
         #for j in range(len(type_of_sampling)):
-        mean_area, confidence_interval = statistics(int(i), samples, runs, type_of_sampling)#, type_of_sampling[j])
+        mean_area, confidence_interval = statistics(int(i+1), samples, runs, type_of_sampling)#, type_of_sampling[j])
         A_j[i,0] = mean_area
         A_j[i,1] = confidence_interval[0]
         A_j[i,2] = confidence_interval[1]
     return A_j # en dan ipv dit returnen vanaf hier plotten
+
+#TODO: np.mean axis; np.percentile axis?; 
