@@ -25,16 +25,16 @@ def MC_integration(iterations, samples):
 
 def MC_integration_circle(samples):
     
-    radius = 1
+    radius = 2
     total_area = (2*radius)**2
     
     count = 0
     
     for k in range(samples):
-        x = np.random.uniform(-1,1)
-        y = np.random.uniform(-1,1)
+        x = np.random.uniform(-radius,radius)
+        y = np.random.uniform(-radius,radius)
         
-        if x**2 + y**2 <= 1:
+        if x**2 + y**2 <= radius**2:
             count += 1
     
     return total_area*count/samples
@@ -58,7 +58,7 @@ def statistics_control_variets(iterations, samples, runs):
     c = -covariance/variance_circle
     
     # New quantity
-    mean_circle = np.pi
+    mean_circle = 4*np.pi
     new_quantity = areas_MB + c*(areas_circle - mean_circle)
     
     # Final statistics
