@@ -17,3 +17,47 @@ def mandelbrot(c, iterations):
     for _ in range(iterations):
         z = z**2 + c
     return abs(z) <= 2
+
+def circular_domain(N):
+    '''
+    Creating a circular domain
+    '''
+    # Starting grid
+    grid = np.zeros((N, N))
+    
+    # Finding centre
+    centre = (N-1) / 2 
+    
+    # Finding radius
+    R = N / 2 / 5
+    
+    # Checking whether gridpoint inside circle, if so put value to 1
+    for j in range(N):
+        for i in range(N):
+            dif_x = abs((i) - centre)
+            dif_y = abs((j) - centre)
+            c = np.sqrt(dif_x ** 2 + dif_y ** 2) 
+            if c < R:
+                grid[j][i] = 1
+                
+    return grid
+
+def MC_integration_circle(samples):
+    '''
+    Calculate the area of a circle usig Monte Carlo integration
+    '''
+    # Defining the radius of circle
+    radius = 0.4
+    total_area = (2*radius)**2
+    
+    count = 0
+    
+    # Sampling
+    for k in range(samples):
+        x = np.random.uniform(-radius,radius)
+        y = np.random.uniform(-radius,radius)
+        
+        if x**2 + y**2 <= radius**2:
+            count += 1
+    
+    return total_area*count/samples
