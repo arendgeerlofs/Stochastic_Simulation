@@ -33,7 +33,7 @@ def MC_integration(iterations, samples, type_of_sampling = []):
     
     ratio = np.zeros((1, 3))
     
-    if 'randomS' in type_of_sampling:
+    if 'RandomS' in type_of_sampling:
         ratio[0][0] = random_sampling(mb_matrix, samples)
         
     if 'LatinS' in type_of_sampling:
@@ -59,9 +59,9 @@ def random_sampling(mb_matrix, samples):
 def Latin_hypercube(mb_matrix, samples):
     counter = 0
     
-    if samples > max(np.shape(mb_matrix)[0], np.shape(mb_matrix)[1]):
-        samples = max(np.shape(mb_matrix)[0], np.shape(mb_matrix)[1])
-        print("The amount of samples used, was corrected to", samples)
+    if samples > min(np.shape(mb_matrix)[0], np.shape(mb_matrix)[1]):
+        samples = min(np.shape(mb_matrix)[0], np.shape(mb_matrix)[1])
+        #print("The amount of samples used, was corrected to", samples)
     
 
     row_indexes = [v for v in range(np.shape(mb_matrix)[0])]
@@ -110,48 +110,85 @@ def statistics(iterations, samples, runs, type_of_sampling = []):
 def stats_per_iteration_value(iterations, samples, runs, type_of_sampling = []):
     mean_area =[]
     confidence_interval =[]
-    A_j = np.zeros((iterations, 4, 3))
+    data = np.zeros((iterations, 4, 3))
     for i in range(iterations):
         mean_area, std_area, confidence_interval =statistics(int(i+1), samples, runs, type_of_sampling)
-        A_j[i,0] = mean_area
-        A_j[i,1] = std_area
-        A_j[i,2] = confidence_interval[0]
-        A_j[i,3] = confidence_interval[1]
-    return A_j
+        data[i,0] = mean_area
+        data[i,1] = std_area
+        data[i,2] = confidence_interval[0]
+        data[i,3] = confidence_interval[1]
+    return data
 
-def plot(A_j, A_M_est = False, difference = False):
-    iterations = np.shape(A_j)[0]
+def stats_per_sample_value(iterations, samples, runs, type_of_sampling = []):
+    mean_area =[]
+    confidence_interval =[]
+    data = np.zeros((int(samples/10), 4, 3))
+    for i in range(0, samples, 10):
+        mean_area, std_area, confidence_interval =statistics(iterations, int(i+1), runs, type_of_sampling)
+        data[int(i/10),0] = mean_area
+        data[int(i/10),1] = std_area
+        data[int(i/10),2] = confidence_interval[0]
+        data[int(i/10),3] = confidence_interval[1]
+    return data
+
+def plot(data, A_M_est = False, difference = False, name="Test"):
+    iterations = np.shape(data)[0]
     if A_M_est:
-        print(f'Estimated A_M with random sampling = {A_j[:,0][-1][0]}')
-        print(f'Estimated A_M with latin hypercube = {A_j[:,0][-1][1]}')
-        print(f'Estimated A_M with orthogonal sampling = {A_j[:,0][-1][2]}')
+        print(f'Estimated A_M with random sampling = {data[:,0][-1][0]}')
+        print(f'Estimated A_M with latin hypercube = {data[:,0][-1][1]}')
+        print(f'Estimated A_M with orthogonal sampling = {data[:,0][-1][2]}')
     plt.figure()
     if difference:
-        plt.plot(np.linspace(1,iterations+1, iterations), A_j[:,0][:,0] - A_j[:,0][:,0][-1]*np.ones(len(A_j[:,0])), label = 'Random sampling', color='red')
-        plt.plot(np.linspace(1,iterations+1, iterations), A_j[:,0][:,1]- A_j[:,0][:,1][-1]*np.ones(len(A_j[:,0])), label = 'Latin hypercube', color='yellow')
-        plt.plot(np.linspace(1,iterations+1, iterations), A_j[:,0][:,2]- A_j[:,0][:,2][-1]*np.ones(len(A_j[:,0])), label = 'Orthogonal sampling', color='blue')
-        plt.fill_between(np.linspace(1,iterations+1, iterations), np.maximum(A_j[:,2][:,0] - A_j[:,0][:,0][-1]*np.ones(len(A_j[:,0])), np.zeros(iterations)), A_j[:,3][:,0] - A_j[:,0][:,0][-1]*np.ones(len(A_j[:,0])), color = 'red', alpha= 0.5)
-        plt.fill_between(np.linspace(1,iterations+1, iterations), np.maximum(A_j[:,2][:,1]- A_j[:,0][:,1][-1]*np.ones(len(A_j[:,0])), np.zeros(iterations)), A_j[:,3][:,1]- A_j[:,0][:,1][-1]*np.ones(len(A_j[:,0])), color = 'yellow', alpha= 0.5)
-        plt.fill_between(np.linspace(1,iterations+1, iterations), np.maximum(A_j[:,2][:,2]- A_j[:,0][:,2][-1]*np.ones(len(A_j[:,0])), np.zeros(iterations)), A_j[:,3][:,2]- A_j[:,0][:,2][-1]*np.ones(len(A_j[:,0])), color = 'blue', alpha= 0.5)
+        plt.plot(np.linspace(1,iterations+1, iterations), data[:,0][:,0] - data[:,0][:,0][-1]*np.ones(len(data[:,0])), label = 'Random sampling', color='red')
+        plt.plot(np.linspace(1,iterations+1, iterations), data[:,0][:,1]- data[:,0][:,1][-1]*np.ones(len(data[:,0])), label = 'Latin hypercube', color='yellow')
+        plt.plot(np.linspace(1,iterations+1, iterations), data[:,0][:,2]- data[:,0][:,2][-1]*np.ones(len(data[:,0])), label = 'Orthogonal sampling', color='blue')
+        plt.fill_between(np.linspace(1,iterations+1, iterations), data[:,2][:,0] - data[:,0][:,0][-1]*np.ones(len(data[:,0])), data[:,3][:,0] - data[:,0][:,0][-1]*np.ones(len(data[:,0])), color = 'red', alpha= 0.5)
+        plt.fill_between(np.linspace(1,iterations+1, iterations), data[:,2][:,1]- data[:,0][:,1][-1]*np.ones(len(data[:,0])), data[:,3][:,1]- data[:,0][:,1][-1]*np.ones(len(data[:,0])), color = 'yellow', alpha= 0.5)
+        plt.fill_between(np.linspace(1,iterations+1, iterations), data[:,2][:,2]- data[:,0][:,2][-1]*np.ones(len(data[:,0])), data[:,3][:,2]- data[:,0][:,2][-1]*np.ones(len(data[:,0])), color = 'blue', alpha= 0.5)
         plt.ylabel('Area difference')
         plt.title(f'Number of iterations against the area difference between current number of iterations and the maximum number of iterations = {iterations}')
     else: 
-        plt.plot(np.linspace(1,iterations+1, iterations), A_j[:,0][:,0], label = 'Random sampling', color='red')
-        plt.plot(np.linspace(1,iterations+1, iterations), A_j[:,0][:,1], label = 'Latin hypercube', color='yellow')
-        plt.plot(np.linspace(1,iterations+1, iterations), A_j[:,0][:,2], label = 'Orthogonal sampling', color='blue')
-        plt.fill_between(np.linspace(1,iterations+1, iterations), A_j[:,2][:,0], A_j[:,3][:,0], color = 'red', alpha= 0.5)
-        plt.fill_between(np.linspace(1,iterations+1, iterations), A_j[:,2][:,1], A_j[:,3][:,1], color = 'yellow', alpha= 0.5)
-        plt.fill_between(np.linspace(1,iterations+1, iterations), A_j[:,2][:,2], A_j[:,3][:,2], color = 'blue', alpha= 0.5)
+        plt.plot(np.linspace(1,iterations+1, iterations), data[:,0][:,0], label = 'Random sampling', color='red')
+        plt.plot(np.linspace(1,iterations+1, iterations), data[:,0][:,1], label = 'Latin hypercube', color='yellow')
+        plt.plot(np.linspace(1,iterations+1, iterations), data[:,0][:,2], label = 'Orthogonal sampling', color='blue')
+        plt.fill_between(np.linspace(1,iterations+1, iterations), data[:,2][:,0], data[:,3][:,0], color = 'red', alpha= 0.5)
+        plt.fill_between(np.linspace(1,iterations+1, iterations), data[:,2][:,1], data[:,3][:,1], color = 'yellow', alpha= 0.5)
+        plt.fill_between(np.linspace(1,iterations+1, iterations), data[:,2][:,2], data[:,3][:,2], color = 'blue', alpha= 0.5)
         plt.ylabel('Estimated area of Mandelbrot set')
         plt.title(f'Number of iterations against the area of the Mandelbrot set')
     plt.xlabel('Number of iterations')
     plt.legend()
+    plt.savefig("figures/{}.pdf".format(name), dpi=300)
     plt.show()
 
-iterations = 100
-runs = 2
-samples = 100
-A_j = stats_per_iteration_value(iterations, samples, runs, type_of_sampling = [])
+def plot_std(data, name="Test"):
+    type_of_sampling = ["Random sampling", "Latin hypercube", "Orthogonal sampling"]
+    colors = ['r', 'b', 'g']
+    samples = np.shape(data)[0]
+    print(data)
+    for i in range(np.shape(data)[2]):
+        plt.plot(np.linspace(1, samples*10+1, samples), data[:, 0, i], color=colors[i], label=type_of_sampling[i])
+        plt.fill_between(np.linspace(1, samples*10+1, samples), data[:, 0, 0] - data[:, 1, 0], data[:, 0, i]+data[:, 1, i], color=colors[i], alpha=0.5)
+    plt.legend()
+    plt.title("Mandelbrot size estimation for different sampling methods")
+    plt.xlabel("Number of samples")
+    plt.ylabel("Estimated size of mandelbrot set")
+    plt.savefig("figures/{}.pdf".format(name), dpi=300)
+    plt.show()
 
-data = stats_per_iteration_value(10, 3, 3, type_of_sampling = ['randomS', 'LatinS', 'OrthogS'])
-plot(data)
+def plot_f_test(data, name="F_test"):
+    colors = ['r', 'b', 'g']
+    samples = np.shape(data)[0]
+    F_value_1 = data[:, 1, 0]**2 / data[:, 1, 1]**2
+    F_value_2 = data[:, 1, 0]**2 / data[:, 1, 2]**2
+    F_value_3 = data[:, 1, 1]**2 / data[:, 1, 2]**2
+    plt.plot(np.linspace(1, samples*10+1, samples), F_value_1, 'r.', label="Random vs LHS")
+    plt.plot(np.linspace(1, samples*10+1, samples), F_value_2, 'b.', label="Random vs Orthogonal")
+    plt.plot(np.linspace(1, samples*10+1, samples), F_value_3, 'g.', label="LHS vs Orthogonal")
+    plt.plot(np.linspace(1, samples*10+1, samples), np.full((samples), 1.15), 'black', label="critical value")
+    plt.title("F-tests between sampling methods")
+    plt.xlabel("Samples")
+    plt.ylabel("F-statistic")
+    plt.legend()
+    plt.savefig("figures/{}.pdf".format(name), dpi=300)
+    plt.show()
