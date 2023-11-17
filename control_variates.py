@@ -3,6 +3,10 @@ from mandelbrot import *
 import matplotlib.pyplot as plt
 
 def MC_integration(iterations, samples):
+    """
+    Using Monte Carlo simulation to approximate the area of the Mandelbrot set 
+    and of the circle.
+    """
     
     xmin = -2
     xmax = 2
@@ -18,6 +22,7 @@ def MC_integration(iterations, samples):
     counter = 0
     counter_circle = 0
     
+    # Sampling and counting
     for k in range(samples):
         i = np.random.randint(0, np.shape(mb_matrix)[0]-1)
         j = np.random.randint(0, np.shape(mb_matrix)[1]-1)
@@ -28,16 +33,21 @@ def MC_integration(iterations, samples):
         if circle_matrix[i,j] == 1:
             counter_circle += 1
     
+    # Approximating the areas
     area_MB = total_area*counter/samples
     area_circle = total_area*counter_circle/samples
             
     return area_MB, area_circle
 
-def statistics_control_variets(iterations, samples, runs):
+def statistics_control_variates(iterations, samples, runs):
+    """
+    Finding the necessary statistics of the control variates method
+    """
     
     areas_MB = np.array([])
     areas_circle = np.array([])
     
+    # Running multiple MC simulations
     for i in range(runs):
         area_MB, area_circle = MC_integration(iterations, samples)
         
@@ -58,7 +68,7 @@ def statistics_control_variets(iterations, samples, runs):
     mean_circle = (0.4**2)*np.pi
     new_quantity = areas_MB + c*(areas_circle - mean_circle)
     
-    # Final statistics control variets
+    # Final statistics control variates
     mean_cv = np.mean(new_quantity, axis=0)
     std_cv = np.std(new_quantity, axis=0)
     
@@ -67,7 +77,7 @@ def statistics_control_variets(iterations, samples, runs):
     return [mean_MB, std_MB, mean_cv, std_cv, F_test]
     
 # Calculate results
-mean_MB, std_MB, mean_cv, std_cv, F_test = statistics_control_variets(100, 10**3, 500)
+mean_MB, std_MB, mean_cv, std_cv, F_test = statistics_control_variates(100, 10**3, 500)
 print(F_test)
 
 # Plot results

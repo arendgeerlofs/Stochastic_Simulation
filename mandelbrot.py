@@ -1,11 +1,17 @@
 import numpy as np
 
 def complex_matrix(xmin, xmax, ymin, ymax, pixel_density):
+    """
+    Creating a matrix with complex values
+    """
     re = np.linspace(xmin, xmax, int((xmax - xmin) * pixel_density))
     im = np.linspace(ymin, ymax, int((ymax - ymin) * pixel_density))
     return re[np.newaxis, :] + im[:, np.newaxis] * 1j
 
 def mandelbrot_matrix(matrix, iterations):
+    """
+    Creating a matrix with ones for inside Mandelbrot and zeros outside
+    """
     for i in range(np.shape(matrix)[0]):
         for j in range(np.shape(matrix)[1]):
             value = mandelbrot(matrix[i][j], iterations)
@@ -13,6 +19,9 @@ def mandelbrot_matrix(matrix, iterations):
     return matrix
 
 def mandelbrot(c, iterations):
+    """
+    Determining wheter complex value is inside Mandelbrot set or not
+    """
     z = 0
     for _ in range(iterations):
         z = z**2 + c
