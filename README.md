@@ -7,3 +7,10 @@ The code used to calculate the effect of control variates on random sampling can
 The code can be run using run.py
 
 This project was created by Arend Geerlofs, Mirjam Koedijk and Kevin Schaaf and will not be maintained after 20/11/2023
+
+Dependencies:
+
+Matplotlib version : 3.6.3
+Numpy version : 1.23.0
+Scipy version : 1.10.0
+Seaborn version : 0.12.2
