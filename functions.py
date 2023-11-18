@@ -193,13 +193,22 @@ def stats_per_sample_value(iterations, samples, runs, type_of_sampling = ["Rando
     return data
 
 def plot(data, a_m_est = False, difference = False, name="Test"):
+    '''
+    Plot and save the mean and confidence intervals of the area of the Mandelbrot set. 
+
+    Input:
+    data        = The data collected estimating the Mandelbrot area using Monte Carlo approximation with random sampling, latin hypercube algorithm and/or orthogonal sampling algorithm. 
+    a_m_est     = True if you want the function to print the best estimation of the Mandelbrot area. False vice versa.
+    difference  = True if you want the plot to show the difference between the area of the iterations compared to the best approximation of the Mandelbrot area.
+    name        = string to change the filename of the saved plot.
+    '''
     iterations = np.shape(data)[0]
-    if a_m_est:
+    if a_m_est: # If wanted, the estimation of the area of the Mandelbrot set could be printed.
         print(f'Estimated A_M with random sampling = {data[:,0][-1][0]}')
         print(f'Estimated A_M with latin hypercube = {data[:,0][-1][1]}')
         print(f'Estimated A_M with orthogonal sampling = {data[:,0][-1][2]}')
     plt.figure()
-    if difference:
+    if difference: # If wanted, the difference between the best estimation and an estimation with less iterations of the Mandelbrot series could be plotted.
         plt.plot(np.linspace(1,iterations+1, iterations), data[:,0][:,0] - data[:,0][:,0][-1]*np.ones(len(data[:,0])), label = 'Random sampling', color='red')
         plt.plot(np.linspace(1,iterations+1, iterations), data[:,0][:,1]- data[:,0][:,1][-1]*np.ones(len(data[:,0])), label = 'Latin hypercube', color='yellow')
         plt.plot(np.linspace(1,iterations+1, iterations), data[:,0][:,2]- data[:,0][:,2][-1]*np.ones(len(data[:,0])), label = 'Orthogonal sampling', color='blue')
@@ -208,7 +217,7 @@ def plot(data, a_m_est = False, difference = False, name="Test"):
         plt.fill_between(np.linspace(1,iterations+1, iterations), data[:,2][:,2]- data[:,0][:,2][-1]*np.ones(len(data[:,0])), data[:,3][:,2]- data[:,0][:,2][-1]*np.ones(len(data[:,0])), color = 'blue', alpha= 0.5)
         plt.ylabel('Area difference')
         plt.title(f'Number of iterations against the area difference between current number of iterations and the maximum number of iterations = {iterations}')
-    else:
+    else: #The mean and 95%-confidence intervals are plotted
         plt.plot(np.linspace(1,iterations+1, iterations), data[:,0][:,0], label = 'Random sampling', color='red')
         plt.plot(np.linspace(1,iterations+1, iterations), data[:,0][:,1], label = 'Latin hypercube', color='yellow')
         plt.plot(np.linspace(1,iterations+1, iterations), data[:,0][:,2], label = 'Orthogonal sampling', color='blue')
