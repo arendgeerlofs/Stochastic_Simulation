@@ -1,6 +1,9 @@
 import numpy as np
 from mandelbrot import *
 import matplotlib.pyplot as plt
+from scipy import stats
+
+plt.rcParams.update({'font.size': 12})
 
 def MC_integration(iterations, samples):
     """
@@ -41,7 +44,8 @@ def MC_integration(iterations, samples):
 
 def statistics_control_variates(iterations, samples, runs):
     """
-    Finding the necessary statistics of the control variates method
+    Performing the control variates method and finding the necessary statistics 
+    of the control variates method
     """
     
     areas_MB = np.array([])
@@ -72,12 +76,23 @@ def statistics_control_variates(iterations, samples, runs):
     mean_cv = np.mean(new_quantity, axis=0)
     std_cv = np.std(new_quantity, axis=0)
     
+    # Normal test
+    res_MB = stats.normaltest(areas_MB)
+    res_cv = stats.normaltest(new_quantity)
+    
+    # F-test
     F_test = std_MB**2/std_cv**2
     
-    return [mean_MB, std_MB, mean_cv, std_cv, F_test]
+    # Levene's test
+    lev = stats.levene(areas_MB, new_quantity)
+    
+    return [mean_MB, std_MB, mean_cv, std_cv, res_MB, res_cv, F_test, lev]
     
 # Calculate results
-mean_MB, std_MB, mean_cv, std_cv, F_test = statistics_control_variates(100, 10**3, 500)
+mean_MB, std_MB, mean_cv, std_cv, res_MB, res_cv, F_test, lev = statistics_control_variates(100, 10**4, 10**4)
+print("normal test MB:", res_MB)
+print("normal test cv:", res_cv)
+print(lev)
 print(F_test)
 
 # Plot results
@@ -89,5 +104,5 @@ ax.set(xlim=(0.5, 2.5), xticks=[1,2])
 ax.set_xticklabels(['MC', 'CV MC'], rotation='vertical', fontsize=18)
 ax.set_ylabel('Mean area')
 
-#plt.savefig("Control_variates.pdf")
-plt.plot()
+plt.savefig("Control_variates.pdf")
+plt.plot() 
