@@ -6,8 +6,8 @@ from functions import stats_per_iteration_value, stats_per_sample_value
 from functions import t_test, plot, plot_std, plot_f_test
 
 ITERATIONS = 100
-SAMPLES = 100
-RUNS = 100
+SAMPLES = 1000
+RUNS = 500
 types_of_sampling = ["RandomS", "LatinS", "OrthogS"]
 data = stats_per_iteration_value(ITERATIONS, SAMPLES, RUNS, types_of_sampling)
 t_values = t_test(data, RUNS)

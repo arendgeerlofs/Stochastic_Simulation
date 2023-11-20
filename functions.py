@@ -172,7 +172,7 @@ def plot(data, a_m_est = False, difference = False, name="Test"):
     name        = string to change the filename of the saved plot
     '''
     iters = np.shape(data)[0]
-    x_data = np.linspace(1,iters+1, iters)
+    x_data = np.linspace(1,iters, iters)
     # Print estimated area of mandelbrot set
     if a_m_est:
         print(f'Estimated A_M with random sampling = {data[:,0][-1][0]}')
@@ -188,11 +188,11 @@ def plot(data, a_m_est = False, difference = False, name="Test"):
         plt.plot(x_data, data[:,0,2] - data[-1,0,2]*np.ones(iters),
                  'b', label = 'Orthogonal sampling')
         plt.fill_between(x_data, data[:,2,0] - data[-1,0,0]*np.ones(iters),
-                         data[:,3,0] - data[-1,0,0]*np.ones(iters), 'r', alpha= 0.5)
+                         data[:,3,0] - data[-1,0,0]*np.ones(iters), color = 'r', alpha= 0.5)
         plt.fill_between(x_data, data[:,2,1] - data[-1,0,1]*np.ones(iters),
-                         data[:,3,1] - data[-1,0,1]*np.ones(iters),'y', alpha= 0.5)
+                         data[:,3,1] - data[-1,0,1]*np.ones(iters), color = 'y', alpha= 0.5)
         plt.fill_between(x_data, data[:,2,2] - data[-1,0,2]*np.ones(iters),
-                         data[:,3,2] - data[-1,0,2]*np.ones(iters), 'b', alpha= 0.5)
+                         data[:,3,2] - data[-1,0,2]*np.ones(iters), color = 'b', alpha= 0.5)
         plt.ylabel('Area difference')
         plt.title(f'Difference in estimated size between current iteration and {iters} iterations')
     # Plot current mean and 95%-confidence intervals
