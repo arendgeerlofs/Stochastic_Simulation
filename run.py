@@ -2,7 +2,8 @@
 Main function from which functions are called
 """
 
-from functions import *
+from functions import stats_per_iteration_value, stats_per_sample_value
+from functions import t_test, plot, plot_std, plot_f_test
 
 ITERATIONS = 100
 SAMPLES = 100

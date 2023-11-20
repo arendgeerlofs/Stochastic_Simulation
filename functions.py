@@ -5,40 +5,9 @@ MC integration, statistic tests and plots
 
 import numpy as np
 import matplotlib.pyplot as plt
+from mandelbrot import complex_matrix, mandelbrot
 
-def complex_matrix(xmin, xmax, ymin, ymax, pixel_density):
-    """
-    Compute complex matrix based on sample space and density
-    """
-    # Real matrix
-    re = np.linspace(xmin, xmax, int((xmax - xmin) * pixel_density))
-    # Imaginary matrix
-    im = np.linspace(ymin, ymax, int((ymax - ymin) * pixel_density))
-    # Create complex matrix
-    return re[np.newaxis, :] + im[:, np.newaxis] * 1j
-
-def mandelbrot_matrix(matrix, iterations):
-    """
-    For each point in the matrix compute if it is in mandelbrot set
-    """
-    for i in range(np.shape(matrix)[0]):
-        for j in range(np.shape(matrix)[1]):
-            value = mandelbrot(matrix[i][j], iterations)
-            matrix[i][j] = value
-    return matrix
-
-def mandelbrot(c, iterations):
-    """
-    Mandelbrot iteration function
-    Check if certain point is in the mandelbrot set after certain amount of iterations
-    """
-    z = 0
-    for _ in range(iterations):
-        # Mandelbrot iteration function
-        z = z**2 + c
-    return abs(z) <= 2
-
-def mc_integration(iterations, samples, type_of_sampling = ["RandomS"]):
+def mc_integration(iterations, samples, type_of_sampling):
     """
     Monte Carlo integration of mandelbrot set
     """
@@ -144,7 +113,7 @@ def orthogonal_sampling(mb_matrix, samples):
             counter += 1
     return counter/samples
 
-def statistics(iterations, samples, runs, type_of_sampling = ["RandomS"]):
+def statistics(iterations, samples, runs, type_of_sampling):
     """
     Compute estimate mandelbrot area for different types of sampling
     """
@@ -158,7 +127,7 @@ def statistics(iterations, samples, runs, type_of_sampling = ["RandomS"]):
     confidence_interval = np.percentile(areas, [2.5, 97.5], axis=0)
     return [mean_area, std_area, confidence_interval]
 
-def stats_per_iteration_value(iterations, samples, runs, type_of_sampling = ["RandomS"]):
+def stats_per_iteration_value(iterations, samples, runs, type_of_sampling):
     """
     Calculate mean, std and confidence intervals for different amounts of iterations
     """
@@ -175,7 +144,7 @@ def stats_per_iteration_value(iterations, samples, runs, type_of_sampling = ["Ra
         data[i,3] = conf_interval[1]
     return data
 
-def stats_per_sample_value(iterations, samples, runs, type_of_sampling = ["RandomS"]):
+def stats_per_sample_value(iterations, samples, runs, type_of_sampling):
     """
     Calculate mean, std and confidence interval values for different amounts of samples
     """
@@ -197,33 +166,43 @@ def plot(data, a_m_est = False, difference = False, name="Test"):
     Plot and save the mean and confidence intervals of the area of the Mandelbrot set. 
 
     Input:
-    data        = The data collected estimating the Mandelbrot area using Monte Carlo approximation with random sampling, latin hypercube algorithm and/or orthogonal sampling algorithm. 
-    a_m_est     = True if you want the function to print the best estimation of the Mandelbrot area. False vice versa.
-    difference  = True if you want the plot to show the difference between the area of the iterations compared to the best approximation of the Mandelbrot area.
-    name        = string to change the filename of the saved plot.
+    data        = Collected data about Random, LHS and Orthogonal sampling 
+    a_m_est     = True if you want the function to print the best estimation of the Mandelbrot area
+    difference  = True if difference between current iteration area and best approximation area
+    name        = string to change the filename of the saved plot
     '''
-    iterations = np.shape(data)[0]
-    if a_m_est: # If wanted, the estimation of the area of the Mandelbrot set could be printed.
+    iters = np.shape(data)[0]
+    x_data = np.linspace(1,iters+1, iters)
+    # Print estimated area of mandelbrot set
+    if a_m_est:
         print(f'Estimated A_M with random sampling = {data[:,0][-1][0]}')
         print(f'Estimated A_M with latin hypercube = {data[:,0][-1][1]}')
         print(f'Estimated A_M with orthogonal sampling = {data[:,0][-1][2]}')
     plt.figure()
-    if difference: # If wanted, the difference between the best estimation and an estimation with less iterations of the Mandelbrot series could be plotted.
-        plt.plot(np.linspace(1,iterations+1, iterations), data[:,0][:,0] - data[:,0][:,0][-1]*np.ones(len(data[:,0])), label = 'Random sampling', color='red')
-        plt.plot(np.linspace(1,iterations+1, iterations), data[:,0][:,1]- data[:,0][:,1][-1]*np.ones(len(data[:,0])), label = 'Latin hypercube', color='yellow')
-        plt.plot(np.linspace(1,iterations+1, iterations), data[:,0][:,2]- data[:,0][:,2][-1]*np.ones(len(data[:,0])), label = 'Orthogonal sampling', color='blue')
-        plt.fill_between(np.linspace(1,iterations+1, iterations), data[:,2][:,0] - data[:,0][:,0][-1]*np.ones(len(data[:,0])), data[:,3][:,0] - data[:,0][:,0][-1]*np.ones(len(data[:,0])), color = 'red', alpha= 0.5)
-        plt.fill_between(np.linspace(1,iterations+1, iterations), data[:,2][:,1]- data[:,0][:,1][-1]*np.ones(len(data[:,0])), data[:,3][:,1]- data[:,0][:,1][-1]*np.ones(len(data[:,0])), color = 'yellow', alpha= 0.5)
-        plt.fill_between(np.linspace(1,iterations+1, iterations), data[:,2][:,2]- data[:,0][:,2][-1]*np.ones(len(data[:,0])), data[:,3][:,2]- data[:,0][:,2][-1]*np.ones(len(data[:,0])), color = 'blue', alpha= 0.5)
+    # Plot difference between current iteration area and best estimation area
+    if difference:
+        plt.plot(x_data, data[:,0,0] - data[-1,0,0]*np.ones(iters),
+                 'r', label = 'Random sampling')
+        plt.plot(x_data, data[:,0,1] - data[-1,0,1]*np.ones(iters),
+                 'y', label = 'LHS sampling')
+        plt.plot(x_data, data[:,0,2] - data[-1,0,2]*np.ones(iters),
+                 'b', label = 'Orthogonal sampling')
+        plt.fill_between(x_data, data[:,2,0] - data[-1,0,0]*np.ones(iters),
+                         data[:,3,0] - data[-1,0,0]*np.ones(iters), 'r', alpha= 0.5)
+        plt.fill_between(x_data, data[:,2,1] - data[-1,0,1]*np.ones(iters),
+                         data[:,3,1] - data[-1,0,1]*np.ones(iters),'y', alpha= 0.5)
+        plt.fill_between(x_data, data[:,2,2] - data[-1,0,2]*np.ones(iters),
+                         data[:,3,2] - data[-1,0,2]*np.ones(iters), 'b', alpha= 0.5)
         plt.ylabel('Area difference')
-        plt.title(f'Number of iterations against the area difference between current number of iterations and the maximum number of iterations = {iterations}')
-    else: #The mean and 95%-confidence intervals are plotted
-        plt.plot(np.linspace(1,iterations+1, iterations), data[:,0][:,0], label = 'Random sampling', color='red')
-        plt.plot(np.linspace(1,iterations+1, iterations), data[:,0][:,1], label = 'Latin hypercube', color='yellow')
-        plt.plot(np.linspace(1,iterations+1, iterations), data[:,0][:,2], label = 'Orthogonal sampling', color='blue')
-        plt.fill_between(np.linspace(1,iterations+1, iterations), data[:,2][:,0], data[:,3][:,0], color = 'red', alpha= 0.5)
-        plt.fill_between(np.linspace(1,iterations+1, iterations), data[:,2][:,1], data[:,3][:,1], color = 'yellow', alpha= 0.5)
-        plt.fill_between(np.linspace(1,iterations+1, iterations), data[:,2][:,2], data[:,3][:,2], color = 'blue', alpha= 0.5)
+        plt.title(f'Difference in estimated size between current iteration and {iters} iterations')
+    # Plot current mean and 95%-confidence intervals
+    else:
+        plt.plot(x_data, data[:,0,0], label = 'Random sampling', color='red')
+        plt.plot(x_data, data[:,0,1], label = 'Latin hypercube', color='yellow')
+        plt.plot(x_data, data[:,0,2], label = 'Orthogonal sampling', color='blue')
+        plt.fill_between(x_data, data[:,2,0], data[:,3,0], color = 'red', alpha= 0.5)
+        plt.fill_between(x_data, data[:,2,1], data[:,3,1], color = 'yellow', alpha= 0.5)
+        plt.fill_between(x_data, data[:,2,2], data[:,3,2], color = 'blue', alpha= 0.5)
         plt.ylabel('Estimated area of Mandelbrot set')
         plt.title('Number of iterations against the area of the Mandelbrot set')
     plt.xlabel('Number of iterations')
